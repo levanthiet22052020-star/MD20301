@@ -1,0 +1,439 @@
+openapi: 3.0.0
+info:
+  title: API Quản lý Bán hàng (MD20301)
+  description: Tài liệu API đầy đủ cho Products, Categories và Users dựa trên Source Code thực tế.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local Server
+
+tags:
+  - name: Users
+    description: Quản lý người dùng (users.js)
+  - name: Products
+    description: Quản lý sản phẩm (productRouter.js)
+  - name: Categories
+    description: Quản lý danh mục (categoryRouter.js)
+
+paths:
+  # ===========================
+  #       USER ROUTES
+  # ===========================
+  /users/all:
+    get:
+      tags:
+        - Users
+      summary: Lấy danh sách tất cả User
+      responses:
+        200:
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        500:
+          description: Lỗi Server
+
+  /users/detail/{id}:
+    get:
+      tags:
+        - Users
+      summary: Xem chi tiết User theo ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID của User (MongoDB ID)
+      responses:
+        200:
+          description: Tìm thấy người dùng
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        404:
+          description: Không tìm thấy người dùng
+        500:
+          description: Lỗi Server
+
+  /users/add:
+    post:
+      tags:
+        - Users
+      summary: Thêm User mới (Đăng ký)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        201:
+          description: Thêm người dùng thành công
+        400:
+          description: Email đã tồn tại
+        500:
+          description: Lỗi Server
+
+  /users/update/{id}:
+    put:
+      tags:
+        - Users
+      summary: Cập nhật thông tin User (ID ở URL)
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID của User cần sửa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: string
+                role:
+                  type: string
+                  enum: [admin, user]
+                status:
+                  type: string
+      responses:
+        200:
+          description: Cập nhật thành công
+        404:
+          description: Không tìm thấy user để sửa
+        500:
+          description: Lỗi Server
+
+  /users/delete/{id}:
+    delete:
+      tags:
+        - Users
+      summary: Xóa User (ID ở URL)
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID User cần xóa
+      responses:
+        200:
+          description: Xóa thành công
+        404:
+          description: Không tìm thấy user
+        500:
+          description: Lỗi Server
+
+  # ===========================
+  #     CATEGORY ROUTES
+  # ===========================
+  /categories/add:
+    post:
+      tags:
+        - Categories
+      summary: Thêm danh mục mới
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                parentId:
+                  type: string
+      responses:
+        204:
+          description: Tạo thành công (No Content but sends JSON in code)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                   status:
+                     type: boolean
+                     example: true
+                   message: 
+                     type: string
+
+  /categories/update:
+    put:
+      tags:
+        - Categories
+      summary: Cập nhật danh mục
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                description:
+                  type: string
+                parentId:
+                  type: string
+      responses:
+        200:
+          description: Kết quả xử lý (Thành công hoặc Không tìm thấy - dựa trên status trả về)
+
+  /categories/delete:
+    delete:
+      tags:
+        - Categories
+      summary: Xóa danh mục (Dùng Query Param ?id=...)
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID danh mục cần xóa
+      responses:
+        200:
+          description: Kết quả xóa (Thành công hoặc Thất bại)
+
+  # ===========================
+  #      PRODUCT ROUTES
+  # ===========================
+  /products/all:
+    get:
+      tags:
+        - Products
+      summary: Lấy danh sách tất cả sản phẩm
+      responses:
+        200:
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: 
+                    type: boolean
+                  count:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+        500:
+          description: Lỗi Server
+
+  /products/detail/{id}:
+    get:
+      tags:
+        - Products
+      summary: Chi tiết sản phẩm (ID ở URL)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200: 
+          description: Thành công
+        404: 
+          description: Không tìm thấy sản phẩm
+        500:
+          description: Lỗi Server
+
+  /products/add:
+    post:
+      tags:
+        - Products
+      summary: Thêm sản phẩm mới
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        201:
+          description: Thêm thành công
+        400:
+          description: Lỗi thêm sản phẩm (Validation hoặc lỗi khác)
+
+  /products/update:
+    put:
+      tags:
+        - Products
+      summary: Cập nhật sản phẩm (ID nằm trong Body)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                quantity:
+                  type: number
+                status:
+                  type: boolean
+                cateID:
+                  type: string
+      responses:
+        200:
+          description: Cập nhật thành công
+        404:
+          description: Không tìm thấy sản phẩm
+        500:
+          description: Lỗi Server
+
+  /products/delete:
+    delete:
+      tags:
+        - Products
+      summary: Xóa sản phẩm (Dùng Query Param ?id=...)
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Xóa thành công
+        404:
+          description: Không tìm thấy sản phẩm
+        500:
+          description: Lỗi xóa sản phẩm
+
+components:
+  schemas:
+    # --- USER SCHEMAS ---
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [admin, user]
+        status:
+          type: string
+    
+    UserInput:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          example: "Nguyen Van A"
+        email:
+          type: string
+          example: "nguyenvana@gmail.com"
+        password:
+          type: string
+          example: "123456"
+        phone:
+          type: string
+          example: "0901234567"
+        role:
+          type: string
+          enum: [admin, user]
+          example: "user"
+
+    # --- PRODUCT SCHEMAS ---
+    Product:
+      type: object
+      properties:
+        _id: 
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: number
+        status:
+          type: boolean
+        cateID:
+          type: string
+        createAt:
+          type: string
+          format: date-time
+        updateAt:
+          type: string
+          format: date-time
+
+    ProductInput:
+      type: object
+      required:
+        - name
+        - price
+      properties:
+        name:
+          type: string
+          example: "Bánh Socola"
+        description:
+          type: string
+          example: "Ngon tuyệt"
+        price:
+          type: number
+          example: 50000
+        quantity:
+          type: number
+          example: 100
+        status:
+          type: boolean
+          example: true
+        cateID:
+          type: string
+          example: "645f..."
