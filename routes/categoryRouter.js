@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var categoryModel = require("../models/Category");
+var categoryModel = require("./models/category");
 
 // api 
 //post: thêm, put: sửa, delete: xóa, get: lấy dữ liệu
