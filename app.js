@@ -12,7 +12,7 @@ const YAML = require('yamljs');
 
 const mongoose = require('mongoose');
 require("./models/product");
-require("./models/Category");
+require("./models/category");
 require("./models/review");
 require("./models/image");
 require("./models/cart");
