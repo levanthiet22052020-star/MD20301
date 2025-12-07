@@ -129,15 +129,18 @@ router.post("/send-mail", async function(req, res, next){
     const {to, subject, content} = req.body;
 
     const mailOptions = {
-      from: "tridinhne <admin@dinhnt.com>",
+      from: '"Cửa hàng MD20301" <zerosenpai3006@gmail.com>',
       to: to,
       subject: subject,
       html: welcomeEmail("Trí", "http://localhost:3000"),
     };
     await sendMail.transporter.sendMail(mailOptions);
     res.json({ status: 1, message: "Gửi mail thành công"});
-  }catch(err){
-    res.json({ status: 0, message: "Gửi mail thất bại"});
+// productRouter.js
+
+  } catch (err) {
+    console.log("Lỗi gửi mail chi tiết:", err); // Thêm dòng này để xem lỗi ở Terminal
+    res.json({ status: 0, message: "Gửi mail thất bại", error: err.message }); // Trả lỗi về Postman để dễ nhìn
   }
 });
 
